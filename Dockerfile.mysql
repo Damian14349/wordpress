@@ -1,0 +1,15 @@
+FROM ubuntu:latest
+
+RUN apt-get update && \
+    apt-get install -y mysql-server
+
+ENV MYSQL_DATABASE=wordpress \
+    MYSQL_ROOT_PASSWORD=wordpress \
+    MYSQL_USER=wordpress \
+    MYSQL_PASSWORD=wordpress
+
+COPY mysql-config.cnf /etc/mysql/conf.d/
+
+EXPOSE 3306
+
+CMD ["mysqld"]

@@ -1,0 +1,27 @@
+FROM ubuntu:latest
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y php php-mysql php-gd php-curl apache2 libapache2-mod-php wget openssl
+
+RUN wget https://wordpress.org/latest.tar.gz && \
+    tar -xzf latest.tar.gz && \
+    mv wordpress /var/www/html/wordpress && \
+    chown -R www-data:www-data /var/www/html/wordpress && \
+    rm latest.tar.gz
+
+RUN a2enmod ssl && \
+    a2enmod rewrite
+
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/ssl/private/localhost.key -out /etc/ssl/certs/localhost.crt \
+    -subj "/C=PL/ST=./L=./O=DamianKurnikIT/OU=./CN=localhost"
+
+COPY wordpress-apache.conf /etc/apache2/sites-available/wordpress.conf
+RUN a2ensite wordpress.conf && a2dissite 000-default.conf
+
+EXPOSE 80
+EXPOSE 443
+
+CMD ["apache2ctl", "-D", "FOREGROUND"]
